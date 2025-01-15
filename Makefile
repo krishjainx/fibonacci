@@ -15,8 +15,9 @@ build:
 	docker build -t $(IMAGE_NAME) .
 
 ## Run Redis container and wait for it to be ready
-redis:
+redis: create-network
 	docker run -d --name $(REDIS_NAME) \
+		--network fibonacci-network \
 		-p $(REDIS_PORT):6379 \
 		$(REDIS_IMAGE) \
 		--port 6379
@@ -42,11 +43,11 @@ wait-for-app:
 ## Run the container in detached mode, mapping port 5000
 run: create-network
 	docker run -d --name $(CONTAINER_NAME) \
-		-p 5000:5000 \
 		--network fibonacci-network \
+		-e REDIS_HOST=$(REDIS_NAME) \
+		-p 5000:5000 \
 		$(IMAGE_NAME)
 	$(MAKE) redis
-	docker network connect fibonacci-network $(REDIS_NAME)
 	$(MAKE) wait-for-app
 
 ## Stop and remove container
@@ -82,6 +83,6 @@ clean: stop
 check-redis:
 	@docker exec $(REDIS_NAME) redis-cli ping || echo "Redis is not responding"
 
-## Create network
+## Create Docker network
 create-network:
-	docker network inspect fibonacci-network >/dev/null 2>&1 || docker network create fibonacci-network
+	docker network create fibonacci-network || true

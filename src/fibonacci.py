@@ -2,18 +2,39 @@ from functools import lru_cache
 import redis
 import logging
 import os
+import time
 
 logger = logging.getLogger(__name__)
 
-# Initialize Redis client with connection error handling
+# Initialize Redis client with connection error handling and retry
 try:
-    redis_host = os.getenv('REDIS_HOST', 'redis-cache')
+    redis_host = os.getenv('REDIS_HOST', 'localhost')
     print(f"Connecting to Redis at {redis_host}:6379...")  # Debug print
-    redis_client = redis.Redis(host=redis_host, port=6379, db=0)
-    redis_client.ping()
-    print("Successfully connected to Redis")  # Debug print
+    
+    # Add retry logic
+    max_retries = 5
+    retry_delay = 1  # seconds
+    
+    for attempt in range(max_retries):
+        try:
+            redis_client = redis.Redis(
+                host=redis_host, 
+                port=6379, 
+                db=0,
+                socket_timeout=5,
+                decode_responses=True
+            )
+            redis_client.ping()
+            print("Successfully connected to Redis")  # Debug print
+            break
+        except redis.ConnectionError as e:
+            if attempt == max_retries - 1:
+                raise
+            print(f"Attempt {attempt + 1}/{max_retries} failed, retrying in {retry_delay}s...")
+            time.sleep(retry_delay)
+            
 except redis.ConnectionError as e:
-    print(f"Redis connection failed: {e}")  # Debug print
+    print(f"Redis connection failed after {max_retries} attempts: {e}")
     logger.warning("Redis not available - falling back to in-memory cache only")
     redis_client = None
 
