@@ -3,5 +3,5 @@ Werkzeug==2.2.3
 pytest==7.2.1
 redis==5.0.1
 flask-limiter==3.5.0
-requests==2.31.0
+requests==2.32.2
 locust==2.15.1
