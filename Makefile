@@ -1,4 +1,4 @@
-# Image name (change if desired)
+# Image namee
 IMAGE_NAME := fibonacci-service
 # Container name
 CONTAINER_NAME := fibonacci-container
@@ -7,9 +7,6 @@ REDIS_NAME := redis-cache
 # Redis image and config
 REDIS_IMAGE := cgr.dev/chainguard/redis:latest
 REDIS_PORT := 6379
-
-# Default shell
-SHELL := /bin/bash
 
 .PHONY: build run stop test-local test-container clean load-test integration-test redis wait-for-app create-network
 

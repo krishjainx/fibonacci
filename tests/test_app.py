@@ -72,7 +72,7 @@ def test_redis_caching():
         result1 = generate_fibonacci_sequence(test_n)
         first_call_time = time.time() - start_time
         
-        # Wait a moment to ensure cache is written
+        # Wait a bit to ensure cache is written
         time.sleep(0.1)
         
         # Verify the value is in Redis
